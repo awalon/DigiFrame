@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+{% block title %}Users - {% endblock %}
+
+{% block html_head %}
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid col-12 row gx-0">
+        <div class="card text-white bg-dark col-12">
+            <h4 class="card-header">Users</h4>
+            <div class="card-body col-12 bg-medium">
+                <div class="card-group flex-column users">
+                    <div class="card text-white bg-dark col-12 stats-picture p-3 table-responsive">
+                        <form class="needs-validation" method="post">
+                            <fieldset>
+                                <div id="mobile-table">
+                                    <table class="table table-dark card-text table-striped col-sm-12 table-hover align-middle">
+                                        <caption>List of users</caption>
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col"><label>Active</label></th>
+                                            <th scope="col"><label>Username</label></th>
+                                            <th scope="col"><label>Email</label></th>
+                                            <th scope="col"><label>Description</label></th>
+                                            <th scope="col"><label>Password</label></th>
+                                            <th scope="col"><label>Action</label></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        {% set count = namespace(value=0) %}
+                                        {% set ns = namespace() %}
+                                        {% set ns.count_user = 0 %}
+                                        {% for user in users %}
+                                            <tr class="user_{{ user }}">
+                                                <th data-title="User #" scope="row" class="align-middle text-wrap">
+                                                    {% set ns.count_user = ns.count_user + 1 %}
+                                                    {{ ns.count_user }}
+                                                </th>
+                                                <td data-title="Active" class="align-middle">
+                                                    <input type="hidden"
+                                                           name="user_{{ user }}_id"
+                                                           id="user_{{ user }}_id"
+                                                           class="form-control text-white bg-dark user_{{ user }}"
+                                                           placeholder="Please enter user ID..."
+                                                           disabled readonly value="{{ users[user]['id'] }}">
+                                                    <div class="form-switch">
+                                                        <input class="form-check-input text-white bg-dark  user_{{ user }}"
+                                                               type="checkbox"
+                                                               name="user_{{ user }}_active"
+                                                               id="user_{{ user }}_active"
+                                                               disabled {% if users[user]['active'] %}checked{% endif %}>
+                                                    </div>
+                                                </td>
+                                                <td data-title="Username" class="text-wrap text-break">
+                                                    <input type="text"
+                                                           name="user_{{ user }}_name"
+                                                           id="user_{{ user }}_name"
+                                                           class="form-control text-white bg-dark user_{{ user }}"
+                                                           placeholder="Please enter name..."
+                                                           disabled required minlength="1" value="{{ users[user]['name'] }}">
+                                                </td>
+                                                <td data-title="Email" class="text-wrap text-break">
+                                                    <input type="email"
+                                                           name="user_{{ user }}_email"
+                                                           id="user_{{ user }}_email"
+                                                           class="form-control text-white bg-dark user_{{ user }}"
+                                                           placeholder="Please enter email..."
+                                                           disabled value="{{ users[user]['email'] }}">
+                                                </td>
+                                                <td data-title="Description" class="text-wrap text-break">
+                                                    <input type="text"
+                                                           name="user_{{ user }}_description"
+                                                           id="user_{{ user }}_description"
+                                                           class="form-control text-white bg-dark user_{{ user }}"
+                                                           placeholder="Please enter description..."
+                                                           disabled value="{{ users[user]['description'] }}">
+                                                </td>
+                                                <td data-title="Password" class="text-wrap text-break password">
+                                                    <input type="password"
+                                                           name="user_{{ user }}_password"
+                                                           id="user_{{ user }}_password"
+                                                           minlength="5"
+                                                           class="form-control text-white bg-dark user_{{ user }}"
+                                                           disabled required value="########">
+                                                </td>
+                                                <td data-title="Actions" class="align-middle actions">
+                                                    <a href="#" onclick="userEdit('user_{{ user }}');"><i class="fa fa-edit"></i></a>
+                                                    {% if current_user.get_id() == user %}
+                                                        <i class="fa fa-trash-alt text-muted"></i>
+                                                    {% else %}
+                                                        <a href="#" onclick="userDelete('{{ user }}')"><i class="fa fa-trash-alt"></i></a>
+                                                    {% endif %}
+                                                    <a href="#" onclick="userAdd('user_{{ user }}');"><i class="fa fa-user-plus"></i></a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                        {% set ns.count_user = ns.count_user + 1 %}
+                                           <tr class="clone_master" data-user-max-id="{{ ns.count_user }}">
+                                                <th data-title="User #" scope="row" class="align-middle text-wrap">
+                                                    ${max_id}
+                                                </th>
+                                                <td data-title="Active" data-title="Actions" class="align-middle">
+                                                    <input type="hidden"
+                                                           name="clone_id"
+                                                           id="clone_id"
+                                                           class="form-control text-white bg-dark"
+                                                           placeholder="Please enter user ID..."
+                                                           readonly value="NEW:${max_id}">
+                                                    <div class="form-switch">
+                                                        <input class="form-check-input text-white bg-dark"
+                                                               type="checkbox"
+                                                               name="clone_active"
+                                                               id="clone_active"
+                                                               checked>
+                                                    </div>
+                                                </td>
+                                                <td data-title="Username" class="text-wrap text-break">
+                                                    <input type="text"
+                                                           name="clone_name"
+                                                           id="clone_name"
+                                                           class="form-control text-white bg-dark"
+                                                           placeholder="Please enter name..."
+                                                           value="">
+                                                </td>
+                                                <td data-title="Email" class="text-wrap text-break">
+                                                    <input type="email"
+                                                           name="clone_email"
+                                                           id="clone_email"
+                                                           class="form-control text-white bg-dark"
+                                                           placeholder="Please enter email..."
+                                                           value="">
+                                                </td>
+                                                <td data-title="Description" class="text-wrap text-break">
+                                                    <input type="text"
+                                                           name="clone_description"
+                                                           id="clone_description"
+                                                           class="form-control text-white bg-dark"
+                                                           placeholder="Please enter description..."
+                                                           value="">
+                                                </td>
+                                                <td data-title="Password" class="text-wrap text-break password">
+                                                    <input type="password"
+                                                           name="clone_password"
+                                                           id="clone_password"
+                                                           class="form-control text-white bg-dark"
+                                                           required value="########">
+                                                </td>
+                                                <td data-title="Actions" class="align-middle actions">
+                                                    <i class="fa fa-edit text-muted"></i>
+                                                    <a href="#" onclick="userDelete('NEW:${max_id}');"><i class="fa fa-trash-alt"></i></a>
+                                                    <a href="#" onclick="userAdd('new_${max_id}');"><i class="fa fa-user-plus"></i></a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="mt-3 text-end">
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </fieldset>
+                            <script>
+                                (function () {
+                                    let passwordElementList = [].slice.call(document.querySelectorAll('.password'));
+                                    let nothing = passwordElementList.map(function (passwordElement) {
+                                        $(passwordElement).keyup(detectCapsLock);
+                                    });
+                                })();
+
+                                (function () {
+                                    'use strict'
+                                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                                    let forms = document.querySelectorAll('.needs-validation')
+                                    // Loop over them and prevent submission
+                                    Array.prototype.slice.call(forms)
+                                        .forEach(function (form) {
+                                            form.addEventListener('submit', function (event) {
+                                                if (!form.checkValidity()) {
+                                                    event.preventDefault()
+                                                    event.stopPropagation()
+                                                }
+                                                form.classList.add('was-validated')
+                                            }, false)
+                                        })
+                                })();
+                            </script>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

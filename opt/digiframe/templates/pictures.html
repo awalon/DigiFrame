@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block title %}Picture Gallery - {% endblock %}
+
+{% block html_head %}
+    <link rel="stylesheet" href="/css/glightbox.min.css"/>
+    <script type="text/javascript" src="/js/glightbox.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.lazy.min.js"></script>
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid col-12 row gx-0">
+        <div class="card text-white bg-dark col-12">
+            <h4 class="card-header">Photos</h4>
+            <div class="card-body col-12 bg-medium">
+                <div class="card-group flex-column users">
+                    <div class="card text-white bg-dark col-12 picture-gallery">
+
+                        <section class="row gx-5 gy-2">
+                            <div class="accordion" id="accordionFolders">
+                                {% set count = namespace(value=0) %}
+                                {% set ns = namespace() %}
+                                {% set ns.count_folder = 0 %}
+                                {% for image in pictures %}
+                                    {# if folder #}
+                                    {% if image[1] == 'd' %}
+                                        {# and folder contains files #}
+                                        {% if image[3] %}
+                                            {% if ns.count_folder > 0 %}
+                                                </div>
+                                                </div>
+                                                </div>
+                                            {% endif %}
+                                            {% set ns.count_folder = ns.count_folder + 1 %}
+                                            <div class="accordion-item">
+                                            <h2 class="accordion-header bg-light" id="heading{{ ns.count_folder }}">
+                                                <button class="accordion-button collapsed text-white section{{ ns.count_folder }}" type="button"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#collapse{{ ns.count_folder }}"
+                                                        aria-expanded="false"
+                                                        aria-controls="collapse{{ ns.count_folder }}"
+                                                        onclick="">
+                                                    <i class="fa fa-folder"></i>
+                                                    {% if sync_mode == 'none' %}
+                                                        <!-- TODO: Add create folder and upload feature -->
+                                                        <i class="fa fa-folder-plus text-muted"></i>
+                                                        <i class="fa fa-upload text-muted"></i>
+                                                    {% endif %}
+                                                    {{ image[0] }}
+                                                </button>
+                                            </h2>
+    {#
+                                                    <section
+                                                            class="text-white bg-dark folder-wrapper col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 p-2">
+                                                        <h4 class="mx-auto d-block" title="{{ image[2] }}">
+                                                            <i class="fa fa-folder"></i> {{ image[0] }}</h4>
+                                                    </section>
+    #}
+                                            <div id="collapse{{ ns.count_folder }}"
+                                                 class="accordion-collapse collapse"
+                                                 aria-labelledby="heading{{ ns.count_folder }}"
+                                                 data-bs-parent="#accordionFolders">
+                                            <div class="accordion-body row">
+
+                                            <script>
+                                                $(function() {
+                                                    $('button.section{{ ns.count_folder }}').click(function () {
+                                                        $('.lazy_section{{ ns.count_folder }}').Lazy({
+                                                            //scrollDirection: 'vertical',
+                                                            //effect: 'fadeIn',
+                                                            visibleOnly: true,
+                                                            enableThrottle: true,
+                                                            throttle: 500,
+                                                            afterLoad: function (element) {
+                                                                element.css('background-image', 'none');
+                                                            },
+                                                            onError: function (element) {
+                                                                console.log('error loading ' + element.data('src'));
+                                                            },
+                                                            bind: "event"
+                                                        });
+                                                    });
+                                                });
+                                            </script>
+                                        {% endif %}
+
+                                    {% else %}
+                                        {% set count.value = count.value + 1 %}
+                                        <section
+                                                class="img-wrapper col-xxl-1 col-xl-2 col-lg-3 col-md-3 col-sm-6 p-5">
+                                            <img class="img-fluid img-thumbnail mx-auto d-block lazy lazy_section{{ ns.count_folder }} glightbox"
+                                                 data-gallery="slideshow"
+                                                 data-src="{{ url_for('gallery', picture=image[0]) }}?width=300"
+                                                 data-glightbox="title: {{ image[2] }}; description: {{ image[0] }}; type: image; href: {{ url_for('gallery', picture=image[0]) }}?height=400;"
+                                                 alt="{{ image[0] }}"
+                                                 title="{{ url_for('gallery', picture=image[0]) }} | {{ image[2] }}"/>
+                                        </section>
+                                    {% endif %}
+                                {% endfor %}
+                                {% if ns.count_folder > 0 %}
+                                    </div>
+                                    </div>
+                                    </div>
+                                {% endif %}
+                </section>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+
+
+    <!-- LightBox Template -->
+    <div class="modal fade" id="gallery-light-box" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="image-gallery-title"></h5>
+                        <h6 class="modal-title" id="image-gallery-subtitle"></h6>
+                    </div>
+                    <button type="button" class="close" data-bs-dismiss="modal"><span aria-hidden="true">×</span><span
+                            class="sr-only">Close</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img id="image-gallery-image" class="img-responsive h-100 w-100" src="" alt="">
+                    <div class="lb-nav" style="">
+                        <a class="lb-prev" href="" style=""></a>
+                        <a class="lb-next" href="" style=""></a>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="show-previous-image" class="btn btn-secondary float-left"><i
+                            class="fa fa-arrow-left"></i>
+                    </button>
+                    <button type="button" id="show-next-image" class="btn btn-secondary float-right"><i
+                            class="fa fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const lightbox = GLightbox({
+            preload: false,
+            loop: false,
+            touchNavigation: true,
+            keyboardNavigation: true,
+            closeOnOutsideClick: false,
+            autoplayVideos: false,
+            width: 'auto',
+            height: 'auto',
+            descPosition: 'top',
+            zoomable: true,
+            draggable: true
+        });
+
+{#        $(function () {
+            $('.lazy').Lazy({
+                //scrollDirection: 'vertical',
+                //effect: 'fadeIn',
+                visibleOnly: true,
+                enableThrottle: true,
+                throttle: 500,
+                afterLoad: function (element) {
+                    element.css('background-image', 'none');
+                },
+                onError: function (element) {
+                    console.log('error loading ' + element.data('src'));
+                }
+            });
+        });#}
+    </script>
+{% endblock %}

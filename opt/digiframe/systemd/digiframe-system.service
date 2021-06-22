@@ -1,0 +1,17 @@
+[Unit]
+Description=DigiFrame Service - System Interface
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Environment="PYTHONPATH=/opt/digiframe:$PYTHONPATH"
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ExecStart=/opt/digiframe/df_system.py
+WorkingDirectory=/opt/digiframe
+Type=idle
+Restart=always
+RestartSec=1
+User=root
+
+[Install]
+WantedBy=default.target

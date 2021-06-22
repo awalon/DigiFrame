@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}Settings - {% endblock %}
+
+{% block html_head %}
+{% endblock %}
+
+{% block content %}
+    <div class="container-fluid col-12 row gx-0">
+        <div class="card text-white bg-dark col-12 col-xl-6">
+            <h4 class="card-header">Settings</h4>
+            <div class="card-body col-12 bg-medium">
+                <div class="card-group flex-column settings">
+                    <div class="card text-white bg-dark col-12 stats-picture">
+
+                        <form method="post">
+                            <fieldset>
+                                <ul class="nav nav-tabs bg-dark" id="settingsTabHead" role="tablist">
+                                    {# tab bar buttons #}
+                                    {% for section in config.SETTINGS %}
+                                        {% if config.SETTINGS[section]['_section']['enabled'] != False %}
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link {% if selected_section == section %}active{% else %}{% endif %} text-white border-bottom"
+                                                        id="{{ section }}-tab" name="{{ section }}-tab"
+                                                        type="button" role="tab"
+                                                        data-bs-toggle="tab" data-bs-target="#{{ section }}"
+                                                        aria-controls="{{ section }}"
+                                                        aria-selected="{% if selected_section == section %}true{% else %}false{% endif %}">
+                                                    {{ config.SETTINGS[section]['_section']['name'] }}
+                                                </button>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+
+
+                                <div class="tab-content" id="settingsTabContent">
+                                    {# config sections #}
+                                    {% for section in config.SETTINGS %}
+                                        {% if config.SETTINGS[section]['_section']['enabled'] != False %}
+                                            <div class="tab-pane fade {% if selected_section == section %}show active{% else %}{% endif %} bg-medium"
+                                                 id="{{ section }}"
+                                                 role="tabpanel"
+                                                 aria-labelledby="{{ section }}-tab"> <!-- start tab / section -->
+                                                <div class="card bg-dark border-0"> <!-- start card -->
+                                                    <div class="card-body"> <!-- start card body -->
+                                                        {# information about current section #}
+                                                        {% if 'info' in config.SETTINGS[section]['_section'] %}
+                                                            <div id="{{ section }}}_info" class="card-body bg-medium rounded-2 mb-3">
+                                                                {{ config.SETTINGS[section]['_section']['info'] }}
+                                                            </div>
+                                                        {% endif %}
+                                                        {# options of current section #}
+                                                        {% for option in config.SETTINGS[section] %}
+                                                            {% if option[0] != '_'
+                                                           and not (section == 'web' and option == 'user')
+                                                           and config.SETTINGS[section][option]['enabled'] != False %}
+                                                                <div class="form-floating mb-3"> <!-- start option -->
+                                                                    {% if config.SETTINGS[section][option]['type'] == 'bool' %}
+                                                                        <div class="form-check form-switch">
+                                                                            <!-- start checkbox -->
+                                                                            <input class="form-check-input text-white bg-dark"
+                                                                                   type="checkbox"
+                                                                                   id="{{ section }}__{{ option }}"
+                                                                                   name="{{ section }}__{{ option }}"
+                                                                                   {% if config.SETTINGS[section][option]['value'] %}checked="checked"{% endif %}/>
+                                                                            <label class="form-check-label"
+                                                                                   for="{{ section }}__{{ option }}">
+                                                                                {% if 'name' in config.SETTINGS[section][option] %}
+                                                                                    {{ config.SETTINGS[section][option]['name'] }}{% else %}
+                                                                                    {{ config.SETTINGS[section][option]['info'] }}{% endif %}</label>
+                                                                            {% if 'info' in config.SETTINGS[section][option]
+                                                                            and 'name' in config.SETTINGS[section][option] %}
+                                                                                <span id="{{ section }}__{{ option }}_info"
+                                                                                      class="form-text">
+                                                                                {{ config.SETTINGS[section][option]['info'] }}
+                                                                            </span>
+                                                                            {% endif %}
+                                                                        </div> <!-- end checkbox -->
+                                                                    {% else %}
+                                                                        {% if 'options_select' in config.SETTINGS[section][option] %}
+                                                                            <select id="{{ section }}__{{ option }}"
+                                                                                    name="{{ section }}__{{ option }}"
+                                                                                    class="form-select text-white bg-dark">
+                                                                                {% for data in config.SETTINGS[section][option]['options_select'] %}
+                                                                                    <option value="{{ data }}" {% if data == config.SETTINGS[section][option]['value'] %}selected="selected"{% endif %}>{{ data }}</option>
+                                                                                {% endfor %}
+                                                                            </select>
+                                                                        {% else %}
+                                                                            <input
+                                                                                    {% if 'options' not in config.SETTINGS[section][option] %}
+                                                                                        type="{% if config.SETTINGS[section][option]['type'] == 'str' %}text{% elif config.SETTINGS[section][option]['type'] == 'int' %}number{% elif config.SETTINGS[section][option]['type'] == 'bool' %}checkbox{% else %}{{ config.SETTINGS[section][option]['type'] }}{% endif %}"
+                                                                                    {% endif %}
+                                                                                        id="{{ section }}__{{ option }}"
+                                                                                        name="{{ section }}__{{ option }}"
+                                                                                    {% if 'options' in config.SETTINGS[section][option] %}
+                                                                                        list="{{ section }}__{{ option }}_dl"
+                                                                                    {% endif %}
+                                                                                        class="form-control text-white bg-dark"
+                                                                                        placeholder="{{ config.SETTINGS[section][option]['info'] }}"
+                                                                                        value="{{ config.SETTINGS[section][option]['value'] }}"/>
+                                                                        {% endif %}
+                                                                        {# label of current option with information as fallback #}
+                                                                        <label for="{{ section }}__{{ option }}"
+                                                                               class="form-label">
+                                                                            {% if 'name' in config.SETTINGS[section][option] %}
+                                                                                {{ config.SETTINGS[section][option]['name'] }}{% else %}
+                                                                                {{ config.SETTINGS[section][option]['info'] }}{% endif %}</label>
+                                                                        {% if 'info' in config.SETTINGS[section][option]
+                                                                        and 'name' in config.SETTINGS[section][option] %}
+                                                                            {# additional information / description, if not already used as label #}
+                                                                            <div id="{{ section }}__{{ option }}_info"
+                                                                                 class="form-text">
+                                                                                {{ config.SETTINGS[section][option]['info'] }}
+                                                                            </div>
+                                                                        {% endif %}
+                                                                        {% if 'options' in config.SETTINGS[section][option] %}
+                                                                            <datalist
+                                                                                    id="{{ section }}__{{ option }}_dl">
+                                                                                {% for data in config.SETTINGS[section][option]['options'] %}
+                                                                                    <option value="{{ data }}">{{ data }}</option>
+                                                                                {% endfor %}
+                                                                            </datalist>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                </div> <!-- end option -->
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                    </div> <!-- end card body -->
+                                                </div>  <!-- end card -->
+                                            </div> <!-- end tab / section -->
+                                        {% endif %}
+                                    {% endfor %}
+                                </div> <!-- end tabs -->
+
+                                <div class="text-end">
+                                    <button type="submit" class="btn btn-primary mx-3 mb-3">Submit</button>
+                                </div>
+                            </fieldset>
+
+                            <script>
+                                $(document).ready(function () {
+                                    $('button[data-bs-toggle="tab"]').on('show.bs.tab', function (e) {
+                                        localStorage.setItem('activeSettingsTab', $(e.target).attr('data-bs-target'));
+                                    });
+                                    let activeTab = localStorage.getItem('activeSettingsTab');
+                                    if (activeTab) {
+                                        $('#settingsTabHead button[data-bs-target="' + activeTab + '"]').tab('show');
+                                    }
+                                });
+                            </script>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

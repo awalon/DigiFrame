@@ -1,0 +1,3 @@
+# Define image (jpg/png) used on splash screen
+#
+#DF_SPLASH=/opt/digiframe/static/splash.png

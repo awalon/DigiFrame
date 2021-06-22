@@ -1,0 +1,15 @@
+[Unit]
+Description=DigiFrame Service - Slideshow
+Conflicts=splash.service
+After=systemd-user-sessions.service plymouth-quit-wait.service splash.service
+
+[Service]
+ExecStart=/opt/digiframe/df_console.py
+Type=idle
+Restart=always
+RestartSec=1
+User=digiframe
+
+[Install]
+#WantedBy=getty.target
+WantedBy=default.target
