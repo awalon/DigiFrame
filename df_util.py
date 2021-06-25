@@ -42,15 +42,15 @@ config_files = ['/etc/digiframe/digiframe.json',
                 '/etc/digiframe/digiframe-%s.json' % proc_user_name,
                 '/home/%s/.config/digiframe/digiframe.json' % proc_user_name,
                 '/home/digiframe/.config/digiframe/digiframe.json',
-                os.path.join(script_path, '/etc/digiframe.json'),
-                os.path.join(script_path, '/etc/digiframe-%s.json' % proc_user_name)
+                os.path.join(script_path, 'etc/digiframe.json'),
+                os.path.join(script_path, 'etc/digiframe-%s.json' % proc_user_name)
                 ]
 
 # add debug/test files
 config_files += [
-    os.path.join(script_path, '../../home/%s/.config/digiframe/digiframe.json' % proc_user_name),
-    os.path.join(script_path, '../../home/digiframe/.config/digiframe/digiframe.json'),
-    os.path.join(script_path, '../../home/digiframe/.config/digiframe/digiframe-%s.json' % proc_user_name)
+    os.path.join(script_path, 'home/%s/.config/digiframe/digiframe.json' % proc_user_name),
+    os.path.join(script_path, 'home/digiframe/.config/digiframe/digiframe.json'),
+    os.path.join(script_path, 'home/digiframe/.config/digiframe/digiframe-%s.json' % proc_user_name)
     ]
 
 
@@ -530,7 +530,7 @@ def init_logger(df_config: Config):
     global df_logger
 
     # init logging (redirects, syslog)
-    LOGGING = {
+    logger_config = {
         'version': 1,
         'disable_existing_loggers': False,
         'formatters': {
@@ -562,13 +562,13 @@ def init_logger(df_config: Config):
 
     if df_config.LOG_TO_SYSLOG:
         if psutil.Process(os.getpid()).ppid() == 1:
-            LOGGING['formatters']['verbose']['format'] = '%(levelname)s - %(message)s'
+            logger_config['formatters']['verbose']['format'] = '%(levelname)s - %(message)s'
         else:
             # Not called by systemd
             # noinspection PyTypeChecker
-            LOGGING['loggers']['digiframe']['handlers'] = ['sys-logger6', 'stdout']
+            logger_config['loggers']['digiframe']['handlers'] = ['sys-logger6', 'stdout']
 
-    config.dictConfig(LOGGING)
+    config.dictConfig(logger_config)
     df_logger = logging.getLogger('digiframe')
 
     sys.stdout = StreamToLogger(df_logger, logging.DEBUG)
