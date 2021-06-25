@@ -46,6 +46,12 @@ An integrated web user interface can be used for configuration, administration a
 
 ## Minimal Requirements
 
+### Hardware
+- Raspberry Pi or another Linux based board
+- Flat screen (old TV or PC monitor)
+- Cables
+
+### Software
 - fim
 - Python3
     - Flask
