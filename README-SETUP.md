@@ -130,7 +130,10 @@ sudo -u digiframe rclone sync <rclone target>:<remote folder>
 
 1. Get *DigiFrame* from github:
     ```shell
-    wget ...
+    wget -O DigiFrame-master.zip https://github.com/awalon/DigiFrame/archive/master.zip
+    unzip DigiFrame-master.zip
+    sudo mv DigiFrame-master /opt/digiframe
+    rm DigiFrame-master.zip
     ```
 
 2. Set user and group
