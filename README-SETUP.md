@@ -61,17 +61,21 @@ sudo apt -y install python3-tz python3-pil python3-pigpio python3-psutil
 sudo -u digiframe rclone config
 ```
 
-Test newly created `<rclone target>`:
+Test newly created **rclone remote**:
 
 ```shell
-sudo -u digiframe rclone lsd <rclone target>:
+sudo -u digiframe rclone lsd <rclone remote>:
 ```
 
 Initial synchronization:
 
+**rclone remote**: Name of remote target as defined with `rclone config`
+
+**remote folder**: Remote folder  
+
 ```shell
 sudo -u digiframe mkdir /home/digiframe/pictures
-sudo -u digiframe rclone sync <rclone target>:<remote folder>
+sudo -u digiframe rclone sync <rclone remote>:<remote folder>
 ```
 
 ## Remove some noise (quite boot)
@@ -128,7 +132,7 @@ sudo -u digiframe rclone sync <rclone target>:<remote folder>
    
 ## Install DigiFrame from GitHub
 
-1. Get *DigiFrame* from github:
+1. Get *DigiFrame* from GitHub:
     ```shell
     wget -O DigiFrame-master.zip https://github.com/awalon/DigiFrame/archive/master.zip
     unzip DigiFrame-master.zip
@@ -137,14 +141,14 @@ sudo -u digiframe rclone sync <rclone target>:<remote folder>
     ```
 
 2. Set user and group
-   1. `etc` structure
+   1. `/etc` structure
       ```shell
       sudo mkdir /etc/digiframe
       sudo chown -R digiframe:digiframe /etc/digiframe
       sudo ln -t /etc/default/ /opt/digiframe/etc/default/digiframe
       ```
       
-   2. Application folder
+   2. Application folder `/opt/digiframe`
        ```shell
        sudo chown -R digiframe:digiframe /opt/digiframe/
        sudo chown root:root /opt/digiframe/df_system.py
@@ -194,4 +198,4 @@ sudo -u digiframe rclone sync <rclone target>:<remote folder>
       
 ## Webpage
 
-Login with admin user `admin` and his initial password: `passw0rd`.
+Open [http://digiframe/](http://digiframe/) in your Browser and login with default user `admin` and initial password `passw0rd`.
