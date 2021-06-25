@@ -20,6 +20,12 @@ automated synchronisation.
 An integrated web user interface can be used for configuration, administration and picture preview.
 
 
+## Use cases / features
+- Digital Photoframe
+- Billboard
+- Corporate advertising
+
+
 ## Planned features
 - Artwork (Project Icon, Logo and Splash Screen)
 - Picture upload via web user interface (without synchronization)
