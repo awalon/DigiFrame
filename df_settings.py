@@ -105,13 +105,16 @@ SETTINGS = {
         },
         "mode": {
             "name": "Mode",
-            "info": "Controls synchronization mode: [none|rclone]",
+            "info": "Controls synchronization mode: [none|rclone|rsync]",
             "value": "none",
             "options_select": ["none", "rclone", "rsync"],
         },
         "source": {
             "name": "Source",
-            "info": "Path of source used for synchronization or rclone URI like <rsync config>:<remote path>",
+            "info": "Path of source used for synchronization. \n"
+                    "rclone source like '<rclone remote>:<remote path>' or \n"
+                    "rsync source like '<remote_user>@<remote_host>:<remote path>' "
+                    "(ssh private key '~/.ssh/rsync-key')",
             "value": "rcl:Digiframe/"
         },
         "interval": {

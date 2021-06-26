@@ -39,11 +39,25 @@ sudo apt -y install rclone
 
 ### *rsync* for synchronisation [optional]
 
-Install *rsync* to synchronize local picture folder with remote linux server.
+Install *rsync* to synchronize local picture folder with remote linux server. 
+
+**Attention:** Existing files and folders in slideshow folder (target) will be removed.
 
 ```shell
 sudo apt -y install rsync
 ```
+
+Create new private key for remote login.
+
+```shell
+sudo -u digiframe ssh-keygen -t ecdsa -f ~/.ssh/rsync-key -C digiframe@digiframe
+```
+
+Add public key to `~ /ssh/authorized_keys` on **remote** server.
+```shell
+sudo -u digiframe cat ~/.ssh/rsync-key
+```
+
 
 ### Python3 modules
 

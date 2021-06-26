@@ -93,25 +93,26 @@ def get_time():
 
 def sync_src():
     if CONFIG.SYNC_MODE == CONFIG.SYNC_MODE_RCLONE:
-        df_logger.info('sync "'
+        df_logger.info('sync with rclone "'
                        + CONFIG.SYNC_SOURCE + '" to "' + CONFIG.PICTURE_PATH + '" (interval: '
                        + str(CONFIG.SYNC_INTERVAL) + ' sec)...')
         try:
             subprocess.run(["/usr/bin/rclone", "sync", CONFIG.SYNC_SOURCE, CONFIG.PICTURE_PATH],
                            stdout=log_pipe_out, stderr=log_pipe_err)
         except Exception as ex_sync:
-            df_logger.error('Can not sync with src: %s' % ex_sync)
+            df_logger.error('Can not sync with rclone src: %s' % ex_sync)
 
     elif CONFIG.SYNC_MODE == CONFIG.SYNC_MODE_RSYNC:
-        # TODO: Implement and Test
-        df_logger.info('sync "'
+        df_logger.info('sync with rsync "'
                        + CONFIG.SYNC_SOURCE + '" to "' + CONFIG.PICTURE_PATH + '" (interval: '
                        + str(CONFIG.SYNC_INTERVAL) + ' sec)...')
         try:
-            subprocess.run(["/usr/bin/rsync", "-av", CONFIG.SYNC_SOURCE, CONFIG.PICTURE_PATH],
+            subprocess.run(["/usr/bin/rsync", "-aP", "--no-owner", "--delete",
+                            "-e ssh -i ~/.ssh/rsync-key -o PubkeyAuthentication=yes",
+                            CONFIG.SYNC_SOURCE, CONFIG.PICTURE_PATH],
                            stdout=log_pipe_out, stderr=log_pipe_err)
         except Exception as ex_sync:
-            df_logger.error('Can not sync with src: %s' % ex_sync)
+            df_logger.error('Can not sync with rsync src: %s' % ex_sync)
 
     else:  # CONFIG.SYNC_MODE_NONE
         df_logger.info('sync is disabled (None)...')
