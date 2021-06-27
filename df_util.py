@@ -69,6 +69,7 @@ class Config:
     LOG_LEVEL = logging.INFO  # Define log level
     LOG_TO_SYSLOG = True  # Enable syslog output
 
+    RANDOM = True
     DEBUG = False
     IPC_PORT = 6000
     PICTURE_TIMEOUT = 15  # number of seconds a picture is displayed
@@ -76,7 +77,7 @@ class Config:
     GPIO_PIR_PIN = 16  # That’s the GPIO pin on which the PIR is plugged on
     GPIO_NO_MOTION_TIMEOUT = 600  # number of seconds to wait after last motion detection before stopping the slideshow
 
-    SYNC_MODE_NONE = None
+    SYNC_MODE_NONE = 'none'
     SYNC_MODE_RCLONE = 'rclone'
     SYNC_MODE_RSYNC = 'rsync'
     SYNC_MODE = SYNC_MODE_RCLONE  # sync mode [none|rclone|rsync]
@@ -294,7 +295,10 @@ class Config:
         # Enable syslog output
         self.LOG_TO_SYSLOG = self.get_option('logger', 'use_syslog', self.LOG_TO_SYSLOG)
 
+        # fim debug mode
         self.DEBUG = self.get_option('slideshow', 'debug', self.DEBUG)
+        # Random playback
+        self.RANDOM = self.get_option('slideshow', 'random', self.RANDOM)
         # local port for inter process communication
         self.IPC_PORT = self.get_option('slideshow', 'ipc_port', self.IPC_PORT)
         # number of seconds a picture is displayed
@@ -308,7 +312,7 @@ class Config:
         # number of seconds to wait after last motion detection before stopping the slideshow
         self.GPIO_NO_MOTION_TIMEOUT = self.get_option('gpio', 'motion_timeout', self.GPIO_NO_MOTION_TIMEOUT)
 
-        # sync mode [none|rclone]
+        # sync mode [none|rclone|rsync]
         self.SYNC_MODE = self.get_option('sync', 'mode', self.SYNC_MODE)
         # sync source path
         self.SYNC_SOURCE = self.get_option('sync', 'source', self.SYNC_SOURCE)

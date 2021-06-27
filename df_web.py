@@ -553,6 +553,32 @@ def get_app():
 
                 if CONFIG.save():
                     flash('Settings was successfully updated!', 'info')
+
+                    # reload web server settings
+                    global time_format, picture_path
+                    CONFIG.reload()
+                    time_format = CONFIG.GLOBAL_TIME_FORMAT
+                    picture_path = CONFIG.PICTURE_PATH
+
+                    # reload slideshow settings
+                    address = ('localhost', CONFIG.IPC_PORT)
+                    try:
+                        conn = Client(address, authkey=bytes(CONFIG.WEB_SECRET, 'utf-8'))
+                        try:
+                            conn.send('c:reload:setting')
+                            status = conn.recv()
+                            if status == 200:
+                                logger.info("Slideshow settings was successfully reloaded")
+                            else:
+                                logger.info("Slideshow settings was not reloaded: %s" % status)
+                        except Exception as e:
+                            flash("Request timeout, cannot connect to console service: %s" % e, 'danger')
+
+                        finally:
+                            if conn is not None:
+                                conn.close()
+                    except Exception as e:
+                        flash("Cannot connect to console service: %s" % e, "danger")
                 else:
                     flash('Settings was not updated! Check logs for further information.', 'danger')
             else:
@@ -692,33 +718,45 @@ def get_app():
         try:
             address = ('localhost', CONFIG.IPC_PORT)
             conn = Client(address, authkey=bytes(CONFIG.WEB_SECRET, 'utf-8'))
-            try:
-                conn.send('q:remix:time')
-                status, time_remix = conn.recv()
-                time_remix_str = datetime.fromtimestamp(time_remix).strftime(time_format)
-                picture_loop_time_left = time_remix - datetime.now(tz=CONFIG.time_zone()).timestamp()
-            except Exception as e:
-                logger.error("Can not query remix time from console service: %s" % e)
-            try:
-                conn.send('q:resync:time')
-                status, time_resync = conn.recv()
-                conn.send('close')
-                time_resync_str = datetime.fromtimestamp(time_resync).strftime(time_format)
-                sync_resync_time_left = time_resync - datetime.now(tz=CONFIG.time_zone()).timestamp()
-            except Exception as e:
-                logger.error("Can not query resync time from console service: %s" % e)
-            finally:
-                if conn:
+            if CONFIG.RANDOM:
+                try:
+                    conn.send('q:remix:time')
+                    status, time_remix = conn.recv()
+                    time_remix_str = datetime.fromtimestamp(time_remix).strftime(time_format)
+                    picture_loop_time_left = time_remix - datetime.now(tz=CONFIG.time_zone()).timestamp()
+                except Exception as e:
+                    logger.error("Can not query remix time from console service: %s" % e)
+            else:
+                time_remix_str = '-'
+            if CONFIG.SYNC_MODE != CONFIG.SYNC_MODE_NONE:
+                try:
+                    conn.send('q:resync:time')
+                    status, time_resync = conn.recv()
                     conn.send('close')
-                    conn.close()
+                    time_resync_str = datetime.fromtimestamp(time_resync).strftime(time_format)
+                    sync_resync_time_left = time_resync - datetime.now(tz=CONFIG.time_zone()).timestamp()
+                except Exception as e:
+                    logger.error("Can not query resync time from console service: %s" % e)
+            else:
+                time_resync_str = '-'
+            if conn:
+                conn.send('close')
+                conn.close()
         except Exception as e:
             if CONFIG.WEB_DEBUG:
-                time_remix = datetime.now().timestamp() + 500
-                time_resync = datetime.now().timestamp() + 500
-                time_remix_str = datetime.fromtimestamp(time_remix).strftime(time_format)
-                picture_loop_time_left = time_remix - datetime.now(tz=CONFIG.time_zone()).timestamp()
-                time_resync_str = datetime.fromtimestamp(time_resync).strftime(time_format)
-                sync_resync_time_left = time_resync - datetime.now(tz=CONFIG.time_zone()).timestamp()
+                if CONFIG.RANDOM:
+                    time_remix = datetime.now().timestamp() + 500
+                    time_remix_str = datetime.fromtimestamp(time_remix).strftime(time_format)
+                    picture_loop_time_left = time_remix - datetime.now(tz=CONFIG.time_zone()).timestamp()
+                else:
+                    time_remix_str = '-'
+
+                if CONFIG.SYNC_MODE != CONFIG.SYNC_MODE_NONE:
+                    time_resync = datetime.now().timestamp() + 500
+                    time_resync_str = datetime.fromtimestamp(time_resync).strftime(time_format)
+                    sync_resync_time_left = time_resync - datetime.now(tz=CONFIG.time_zone()).timestamp()
+                else:
+                    time_resync_str = '-'
 
             logger.error("Can not connect to console service: %s" % e)
 

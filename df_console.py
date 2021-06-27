@@ -54,11 +54,12 @@ def start_slideshow(splashshow):
     if splashshow:
         stop_splashshow(splashshow)
     try:
-        slideshow = subprocess.Popen(
-            ["fim", "--device", "/dev/fb0", "--vt", "1", "--random", "--no-commandline", "--quiet",
-             "--recursive", CONFIG.PICTURE_PATH, "--execute-commands-early", '_scale_style="h"', "--execute-commands",
-             'while(1){display;sleep "' + str(CONFIG.PICTURE_TIMEOUT) + '";next;}'],
-            stdout=log_pipe_out, stderr=log_pipe_err)
+        cmd = ["fim", "--device", "/dev/fb0", "--vt", "1", "--no-commandline", "--quiet",
+               "--recursive", CONFIG.PICTURE_PATH, "--execute-commands-early", '_scale_style="h"', "--execute-commands",
+               'while(1){display;sleep "' + str(CONFIG.PICTURE_TIMEOUT) + '";next;}']
+        if CONFIG.RANDOM:
+            cmd.append("--random")
+        slideshow = subprocess.Popen(cmd, stdout=log_pipe_out, stderr=log_pipe_err)
         time.sleep(5)  # Give time for fim to start so when the screen is turned on there’s already a picture displayed
         subprocess.run(["vcgencmd", "display_power", "1"], stdout=log_pipe_out, stderr=log_pipe_err)
         return slideshow
@@ -265,7 +266,7 @@ def main():
         #    slideshow = None
 
         # restart and remix playlist after each loop
-        elif slideshow is not None and get_time() > TIME_REMIX:
+        elif slideshow is not None and CONFIG.RANDOM and get_time() > TIME_REMIX:
             df_logger.info('loop finished after ' + str(loop_time / 60) + ' minutes...')
             TIME_REMIX = get_time() + loop_time
             slideshow = restart_slideshow(slideshow)
