@@ -17,12 +17,15 @@
         along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
+import os.path
 import df_util
 from df_util import df_logger
 import datetime
 import logging.handlers
 import sys
 import time
+import tempfile
+from PIL import Image, ImageDraw, ImageFont, ImageColor
 import psutil
 import subprocess
 import threading
@@ -122,6 +125,51 @@ def sync_src():
     return file_hash, file_count, get_time()
 
 
+def get_splash_with_host_info(splash_picture: str) -> str:
+    try:
+        if os.path.isfile(splash_picture):
+            sys_info = df_util.get_sys_stat()
+            font_file = os.path.join(df_util.script_path, 'static/fonts/anita-semi-square/Anita semi square.ttf')
+
+            # add information to default splash screen
+            img = Image.open(splash_picture)
+            draw = ImageDraw.Draw(img)
+
+            x = 40
+            y = 40
+            # host name
+            draw.rectangle([(0, y-5), (img.width, y+40)], fill='#212529cc', width=0)
+            font = ImageFont.truetype(font_file, 32)
+            draw.text((x, y), sys_info['sys_name'], CONFIG.WEB_THEME_COLOR, font=font)
+            y += 5
+
+            # host IPs
+            font = ImageFont.truetype(font_file, 24)
+            for net_if, info in sys_info['_net_if']:
+                if net_if != 'lo':
+                    for address in info:
+                        y += 40
+                        draw.rectangle([(0, y-5), (img.width, y+35)],
+                                       fill='#2c3034cc', width=0)
+                        draw.text((x, y),
+                                  '%s (%s): %s' % (net_if, address['family'], address['address']),
+                                  CONFIG.WEB_THEME_COLOR,
+                                  font=font)
+
+            # write new, temporary splash picture
+            temp_dir = tempfile.gettempdir()
+            splash_picture_with_host_info = os.path.join(temp_dir, 'host_info_%s' % os.path.basename(splash_picture))
+            img.save(splash_picture_with_host_info)
+
+            df_logger.info('splash screen with host information: %s' % splash_picture_with_host_info)
+            return splash_picture_with_host_info
+
+    except Exception as ex:
+        df_logger.error('Can not generate host info: %s' % ex)
+        pass
+    return splash_picture
+
+
 def start_splashshow():
     df_logger.info('splash screen...')
     turn_off_cursor()
@@ -139,10 +187,20 @@ def start_splashshow():
         except Exception as ex_kill:
             df_logger.error('Can not kill old process: %s' % ex_kill)
     try:
-        splashshow = subprocess.Popen(['fim', '--device', '/dev/fb0', '--vt', '1', '--quiet', '--no-commandline',
-                                       '-a', '/opt/splash/splash.png'], stdout=log_pipe_out, stderr=log_pipe_err)
-        time.sleep(3)
+        splash_time = 3
+        splash_picture = os.path.join(df_util.script_path, 'static/splash.png')
+        if CONFIG.SHOW_HOST_INFO:
+            splash_picture = get_splash_with_host_info(splash_picture)
+            splash_time += 7
+
+        cmd = ['fim', '--device', '/dev/fb0', '--vt', '1', '--no-commandline', '--quiet',
+               '-a', "--execute-commands-early", '_scale_style="h"', '--', splash_picture]
+        df_logger.debug("Splash cmd: %s" % ' '.join(cmd))
+        splashshow = subprocess.Popen(cmd,
+                                      stdout=log_pipe_out, stderr=log_pipe_err)
+        time.sleep(splash_time)
         return splashshow
+
     except Exception as ex_splash:
         df_logger.error('Can not start splash screen: %s' % ex_splash)
         if CONFIG.DEBUG:

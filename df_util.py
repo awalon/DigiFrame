@@ -21,6 +21,7 @@ import getpass
 import json
 import logging.handlers
 import io
+import socket
 import threading
 import os
 import sys
@@ -70,6 +71,7 @@ class Config:
     LOG_TO_SYSLOG = True  # Enable syslog output
 
     RANDOM = True
+    SHOW_HOST_INFO = True
     DEBUG = False
     IPC_PORT = 6000
     PICTURE_TIMEOUT = 15  # number of seconds a picture is displayed
@@ -297,6 +299,8 @@ class Config:
 
         # fim debug mode
         self.DEBUG = self.get_option('slideshow', 'debug', self.DEBUG)
+        # Show host information
+        self.SHOW_HOST_INFO = self.get_option('slideshow', 'show_host_info', self.SHOW_HOST_INFO)
         # Random playback
         self.RANDOM = self.get_option('slideshow', 'random', self.RANDOM)
         # local port for inter process communication
@@ -649,7 +653,7 @@ def get_sys_load():
         return psutil.getloadavg()
     except Exception as ex_ps_load:
         if df_logger:
-            df_logger.error('Error can not get load (psutil): %s' % ex_ps_load)
+            df_logger.warning('Error can not get load (psutil): %s' % ex_ps_load)
         return os.getloadavg()
 
 
@@ -675,16 +679,21 @@ def get_ip_family_name(family):
         return 'other'
 
 
+def get_sys_name():
+    return socket.gethostname()
+
+
 def get_sys_cores():
     return psutil.cpu_count()
 
 
-def get_sys_stat():
+def get_sys_stat() -> dict:
     net_ifs = psutil.net_if_addrs()
     return {
         'cpu_count': get_sys_cores(),
         'cpu_percent': psutil.cpu_percent(),
         'cpu_freq': psutil.cpu_freq(),
+        'sys_name': get_sys_name(),
         'sys_load': get_sys_load(),
         'mem_virt': psutil.virtual_memory(),
         'mem_swap': psutil.swap_memory(),

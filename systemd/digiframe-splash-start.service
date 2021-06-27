@@ -12,6 +12,7 @@ ExecStart=/opt/digiframe/splash.sh
 ExecStartPost=/bin/sleep 3
 StandardInput=tty
 StandardOutput=tty
+User=digiframe
 
 [Install]
 WantedBy=sysinit.target

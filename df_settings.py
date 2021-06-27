@@ -67,6 +67,11 @@ SETTINGS = {
             "info": "Plays pictures in random order and remix them after each loop.",
             "value": True
         },
+        "show_host_info": {
+            "name": "Show host information",
+            "info": "Show host name and IP on startup.",
+            "value": True
+        },
         "debug": {
             "name": "Debug mode",
             "info": "Debug mode, if enabled service stays active even on missing fim.",
