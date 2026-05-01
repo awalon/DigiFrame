@@ -1,3 +1,13 @@
+# This project has moved
+
+> [!WARNING]  
+> This repository is now maintained at
+> [https://codeberg.org/Awalon/DigiFrame](https://codeberg.org/Awalon/DigiFrame).
+
+> [!CAUTION]  
+> This GitHub mirror may be out of date. Please file issues and
+> contributions on Codeberg.
+
 # DigiFrame v0.1
 
 [![Poject: DigiFrame](https://img.shields.io/badge/Project-DigiFrame-red.svg?style=flat-square)](https://github.com/awalon/DigiFrame/)
